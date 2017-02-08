@@ -1,12 +1,9 @@
 package br.com.ygsoftware.sysco;
 
+import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.app.NotificationCompat;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -29,7 +26,7 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
     private Request request;
 
     private NotificationManager notifyMng;
-    private NotificationCompat.Builder notification;
+    private Notification notification;
 
     private int notificationId = 0;
 
@@ -59,15 +56,8 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
 
         if(listener != null) {
             notification = listener.onStartDownload(request, outputFile);
+            notifyMng.notify(notificationId, notification);
         }
-        if(notification == null) {
-            notification = new NotificationCompat.Builder(context);
-            notification.setContentTitle("Preparando Download");
-            notification.setContentText("De: " + url);
-        }
-        notification.setProgress(0, 0, true);
-
-        notifyMng.notify(notificationId, notification.build());
     }
 
     /**
@@ -120,12 +110,9 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
      * */
     protected void onProgressUpdate(Integer... progress) {
         // setting progress percentage
-        if(listener != null){
+        if(listener != null) {
             notification = listener.onProgressUpdate(request, progress[0], outputFile);
-            notifyMng.notify(notificationId, notification.build());
-        }else{
-            notification.setProgress(100, progress[0], false);
-            notifyMng.notify(notificationId, notification.build());
+            notifyMng.notify(notificationId, notification);
         }
     }
 
@@ -138,15 +125,8 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
         // dismiss the dialog after the file was downloaded
         if(listener != null){
             notification = listener.onFinishDownload(request, outputFile);
-        }else {
-            notification.setContentTitle("Donwload Concluido");
-            notification.setContentText("Abrir " + outputFile.getName());
-
-            Intent res = new Intent(Intent.ACTION_VIEW, Uri.parse(outputFile.getPath()));
-
-            notification.setContentIntent(PendingIntent.getActivity(context, 0, res, PendingIntent.FLAG_UPDATE_CURRENT));
+            notifyMng.notify(notificationId, notification);
         }
-        notifyMng.notify(notificationId, notification.build());
     }
 
 }

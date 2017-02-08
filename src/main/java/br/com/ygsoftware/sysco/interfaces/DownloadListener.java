@@ -1,6 +1,6 @@
 package br.com.ygsoftware.sysco.interfaces;
 
-import android.support.v4.app.NotificationCompat;
+import android.app.Notification;
 
 import java.io.File;
 
@@ -12,10 +12,10 @@ import br.com.ygsoftware.sysco.model.Request;
 
 public interface DownloadListener {
 
-    NotificationCompat.Builder onStartDownload(Request request, File outputFile);
+    Notification onStartDownload(Request request, File outputFile);
 
-    NotificationCompat.Builder onProgressUpdate(Request request, int progress, File outputFile);
+    Notification onProgressUpdate(Request request, int progress, File outputFile);
 
-    NotificationCompat.Builder onFinishDownload(Request request, File outputFile);
+    Notification onFinishDownload(Request request, File outputFile);
 
 }
