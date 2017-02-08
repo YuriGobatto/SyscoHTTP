@@ -56,7 +56,7 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
 
         if(listener != null) {
             notification = listener.onStartDownload(request, outputFile);
-            notifyMng.notify(notificationId, notification);
+            notify(notification);
         }
     }
 
@@ -99,7 +99,10 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
             input.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            if (listener != null){
+                notification = listener.onErrorDownload(request, e, outputFile);
+                notify(notification);
+            }
         }
 
         return null;
@@ -112,7 +115,7 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
         // setting progress percentage
         if(listener != null) {
             notification = listener.onProgressUpdate(request, progress[0], outputFile);
-            notifyMng.notify(notificationId, notification);
+            notify(notification);
         }
     }
 
@@ -125,6 +128,12 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
         // dismiss the dialog after the file was downloaded
         if(listener != null){
             notification = listener.onFinishDownload(request, outputFile);
+            notify(notification);
+        }
+    }
+
+    private void notify(Notification notification){
+        if(notification != null){
             notifyMng.notify(notificationId, notification);
         }
     }

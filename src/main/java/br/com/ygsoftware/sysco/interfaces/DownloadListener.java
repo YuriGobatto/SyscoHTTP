@@ -18,4 +18,6 @@ public interface DownloadListener {
 
     Notification onFinishDownload(Request request, File outputFile);
 
+    Notification onErrorDownload(Request request, Exception error, File outputFile);
+
 }
