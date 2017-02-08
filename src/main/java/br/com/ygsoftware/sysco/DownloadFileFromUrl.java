@@ -20,7 +20,7 @@ import br.com.ygsoftware.sysco.model.Request;
 import br.com.ygsoftware.sysco.model.post.PostFile;
 import br.com.ygsoftware.sysco.utils.Check;
 
-class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
+public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
 
     private Context context;
     private File outputFile;
