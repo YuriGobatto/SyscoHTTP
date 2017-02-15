@@ -35,7 +35,7 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
     public DownloadFileFromUrl(Context context, RequestDownload request, DownloadListener listener) {
 
         Check.isValidURL(request.getUrl(), "");
-        if (request.getOutputFile() == null){
+        if (request.getOutputFile() == null) {
             throw new InvalidParameterException("Output file is null");
         }
 
@@ -47,20 +47,20 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
 
         notificationId = hashCode();
 
-        if (listener != null){
-            if (outputFile.exists()){
+        if (listener != null) {
+            if (outputFile.exists()) {
                 boolean substitue = this.listener.onFileExists(this.request, outputFile);
-                if (substitue){
+                if (substitue) {
                     outputFile.delete();
-                }else{
+                } else {
                     File[] downDir = outputFile.getParentFile().listFiles();
                     int filesName = 0;
-                    for (File check : downDir){
-                        if (check.getName().contains(outputFile.getName())){
+                    for (File check : downDir) {
+                        if (check.getName().contains(outputFile.getName())) {
                             filesName++;
                         }
                     }
-                    outputFile = new File(outputFile.getParentFile(), outputFile.getName()+"("+filesName+")");
+                    outputFile = new File(outputFile.getParentFile(), outputFile.getName() + "(" + filesName + ")");
                 }
             }
         }
@@ -154,7 +154,7 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
         }
     }
 
-    private void notify(NotificationCompat.Builder notification){
+    private void notify(NotificationCompat.Builder notification) {
         if(notification != null){
             notifyMng.notify(notificationId, notification.build());
         }
