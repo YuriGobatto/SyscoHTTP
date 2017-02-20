@@ -1,15 +1,12 @@
 package br.com.ygsoftware.sysco.model;
 
 import android.content.Context;
-import android.support.annotation.IntDef;
 import android.util.Log;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,13 +18,10 @@ import java.util.Map;
 
 import br.com.ygsoftware.sysco.BuildConfig;
 import br.com.ygsoftware.sysco.array.DataArray;
+import br.com.ygsoftware.sysco.enums.RequestMethods;
 import br.com.ygsoftware.sysco.model.get.GetString;
 import br.com.ygsoftware.sysco.model.post.PostFile;
 import br.com.ygsoftware.sysco.model.post.PostString;
-
-/**
- * Created by adriana on 25/01/2017.
- */
 
 public class Request {
 
@@ -37,23 +31,8 @@ public class Request {
     private static final String boundary = "*****";
 
 
-    /*PUBLIC STATIC CONSTANTS*/
-    public static final int GET_METHOD = 0;
-    public static final int POST_METHOD = 1;
-    public static final int FILES_METHOD = 2;
-
-    @IntDef({POST_METHOD, GET_METHOD, FILES_METHOD})
-    @Retention(RetentionPolicy.SOURCE)
-    private @interface DecodeMethods {
-    }
-
-    @IntDef({POST_METHOD, GET_METHOD})
-    @Retention(RetentionPolicy.SOURCE)
-    private @interface HTTPMethods {
-    }
-
     private String url = "";
-    private String method = "POST";
+    private RequestMethods method = RequestMethods.POST;
 
     Map<String, String> arrayHeader = new HashMap<>();
     DataArray data = new DataArray();
@@ -66,21 +45,21 @@ public class Request {
     private String userAgent = "";
 
     public Request(String url) {
-        this(url, POST_METHOD);
+        this(url, RequestMethods.POST);
     }
 
     public Request(String url, DataArray data) {
-        this(url, POST_METHOD, data);
+        this(url, RequestMethods.POST, data);
     }
 
-    public Request(String url, @HTTPMethods int method) {
+    public Request(String url, RequestMethods method) {
         this(url, method, null);
     }
 
-    public Request(String url, @HTTPMethods int method, DataArray data) {
+    public Request(String url, RequestMethods method, DataArray data) {
         try {
             setUrl(url);
-            this.method = (method == GET_METHOD ? "GET" : "POST");
+            this.method = method;
             setData(data);
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -179,7 +158,7 @@ public class Request {
 
     public Request rebuild(){
         url = "";
-        method = "POST";
+        method = RequestMethods.POST;
         requested = false;
         clearAll();
 
@@ -202,7 +181,7 @@ public class Request {
         conn.setDoInput(true); // Allow Inputs
         conn.setDoOutput(true); // Allow Outputs
         conn.setUseCaches(false); // Don't use a Cached Copy
-        conn.setRequestMethod(method);
+        conn.setRequestMethod(method.getMethod());
         conn.setRequestProperty("User-Agent", userAgent);
         conn.setRequestProperty("Connection", "Keep-Alive");
         conn.setRequestProperty("ENCTYPE", "multipart/form-data");
@@ -228,7 +207,7 @@ public class Request {
     }
 
     private void prepareGETStrings() throws UnsupportedEncodingException {
-        Map<String, String> arrayGet = getArray(GET_METHOD);
+        Map<String, String> arrayGet = getArray(RequestMethods.GET);
         String prepareUrlSplit = url.replace("?", "_QST_");
         String prepareUrl = prepareUrlSplit.split("_QST_")[0];
         if (prepareUrlSplit.split("_QST_").length - 1 > 0) {
@@ -282,21 +261,20 @@ public class Request {
         return "file_" + postFilesLength;
     }
 
-    public String getMethod() {
+    public RequestMethods getMethod() {
         return method;
     }
 
-    public Request setMethod(String method) {
+    public Request setMethod(RequestMethods method) {
         this.method = method;
         return this;
     }
 
-    public ArrayList<String> getKeys(@DecodeMethods int method) {
+    public ArrayList<String> getKeys(RequestMethods method) {
         ArrayList<String> res = new ArrayList<>();
-        Iterator<String> keys = getArray(method).keySet().iterator();
 
-        while (keys.hasNext()) {
-            res.add(keys.next());
+        for (String s : getArray(method).keySet()) {
+            res.add(s);
         }
 
         return res;
@@ -310,7 +288,7 @@ public class Request {
         postFilesLength = 0;
     }
 
-    public String getValue(@DecodeMethods int method, String key) {
+    public String getValue(RequestMethods method, String key) {
         Map<String, String> map = getArray(method);
         if (map.containsKey(key)) {
             return map.get(key);
@@ -319,7 +297,7 @@ public class Request {
         }
     }
 
-    private String getArrayToString(@DecodeMethods int method) {
+    private String getArrayToString(RequestMethods method) {
         StringBuilder sb = new StringBuilder();
         Iterator<String> keys = getArray(method).keySet().iterator();
         if (!keys.hasNext()) {
@@ -342,15 +320,15 @@ public class Request {
         return sb.toString();
     }
 
-    public Map<String, String> getArray(@DecodeMethods int method) {
+    public Map<String, String> getArray(RequestMethods method) {
         Map<String, String> res = new HashMap<>();
 
         for (Method obj : data) {
-            if (method == GET_METHOD && obj instanceof GetString) {
+            if (method == RequestMethods.GET && obj instanceof GetString) {
                 res.put(obj.getKey(), ((GetString) obj).getValue());
-            } else if (method == POST_METHOD && obj instanceof PostString) {
+            } else if (method == RequestMethods.POST && obj instanceof PostString) {
                 res.put(obj.getKey(), ((PostString) obj).getValue());
-            } else if (method == FILES_METHOD && obj instanceof PostFile) {
+            } else if (method == RequestMethods.FILES && obj instanceof PostFile) {
                 res.put(obj.getKey(), ((PostFile) obj).getValue().toString());
             }
         }
@@ -359,7 +337,7 @@ public class Request {
     }
 
     public boolean isValidMethod() {
-        return (GET_METHOD == (method.equals("GET") ? 0 : 1) && haveDataForSend());
+        return (method.getMethod().equals("POST") && haveDataForSend());
     }
 
     public boolean haveDataForSend() {
@@ -372,9 +350,9 @@ public class Request {
                 "\n url= '" + url + '\'' +
                 ",\n method= '" + method + '\'' +
                 ",\n arrayHeader= " + arrayHeader +
-                ",\n arrayFiles= " + getArrayToString(FILES_METHOD) +
-                ",\n arrayPost= " + getArrayToString(POST_METHOD) +
-                ",\n arrayGet= " + getArrayToString(GET_METHOD) +
+                ",\n arrayFiles= " + getArrayToString(RequestMethods.FILES) +
+                ",\n arrayPost= " + getArrayToString(RequestMethods.POST) +
+                ",\n arrayGet= " + getArrayToString(RequestMethods.GET) +
                 "\n}";
     }
 }

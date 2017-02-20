@@ -1,11 +1,16 @@
 package br.com.ygsoftware.sysco.enums;
 
-/**
- * Created by adriana on 26/01/2017.
- */
-
 public enum RequestMethods {
 
-    GET, POST
+    GET("GET"), POST("POST"), FILES("POST");
 
+    private String method;
+
+    RequestMethods(String method) {
+        this.method = method;
+    }
+
+    public String getMethod() {
+        return method;
+    }
 }

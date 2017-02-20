@@ -3,9 +3,6 @@ package br.com.ygsoftware.sysco.model;
 import br.com.ygsoftware.sysco.enums.RequestMethods;
 import br.com.ygsoftware.sysco.utils.Check;
 
-/**
- * Created by adriana on 26/01/2017.
- */
 
 public abstract class Method<T> {
 
@@ -41,15 +38,15 @@ public abstract class Method<T> {
         this.value = value;
     }
 
-    public RequestMethods getMethod() {
+    public final RequestMethods getMethod() {
         return method;
     }
 
-    boolean isRequested() {
+    final boolean isRequested() {
         return requested;
     }
 
-    void setRequested(boolean requested) {
+    final void setRequested(boolean requested) {
         this.requested = requested;
     }
 

@@ -30,8 +30,6 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
 
     private int notificationId = 0;
 
-    public final static String FILE_OUTPUT_KEY = "br.com.ygsoftware.sysco.FILE_OUTPUT";
-
     public DownloadFileFromUrl(Context context, RequestDownload request, DownloadListener listener) {
 
         Check.isValidURL(request.getUrl(), "");
