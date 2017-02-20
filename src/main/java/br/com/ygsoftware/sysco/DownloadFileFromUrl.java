@@ -67,14 +67,14 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
     /**
      * Before starting background thread
      * Show Progress Bar Dialog
-     * */
+     */
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
 
-        notifyMng = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notifyMng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if(listener != null) {
+        if (listener != null) {
             notification = listener.onStartDownload(request, outputFile);
             notify(notification);
         }
@@ -82,7 +82,7 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
 
     /**
      * Downloading file in background thread
-     * */
+     */
     @Override
     protected String doInBackground(Void... p) {
         int count;
@@ -105,7 +105,7 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
                 total += count;
                 // publishing the progress....
                 // After this onProgressUpdate will be called
-                publishProgress((int)((total*100)/lenghtOfFile));
+                publishProgress((int) ((total * 100) / lenghtOfFile));
 
                 // writing data to file
                 output.write(data, 0, count);
@@ -119,7 +119,7 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
             input.close();
 
         } catch (Exception e) {
-            if (listener != null){
+            if (listener != null) {
                 notification = listener.onErrorDownload(request, notification, e, outputFile);
                 notify(notification);
             }
@@ -130,10 +130,10 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
 
     /**
      * Updating progress bar
-     * */
+     */
     protected void onProgressUpdate(Integer... progress) {
         // setting progress percentage
-        if(listener != null) {
+        if (listener != null) {
             notification = listener.onProgressUpdate(request, notification, progress[0], outputFile);
             notify(notification);
         }
@@ -142,18 +142,18 @@ public class DownloadFileFromUrl extends AsyncTask<Void, Integer, String> {
     /**
      * After completing background task
      * Dismiss the progress dialog
-     * **/
+     **/
     @Override
     protected void onPostExecute(String file_url) {
         // dismiss the dialog after the file was downloaded
-        if(listener != null){
+        if (listener != null) {
             notification = listener.onFinishDownload(request, notification, outputFile);
             notify(notification);
         }
     }
 
     private void notify(NotificationCompat.Builder notification) {
-        if(notification != null){
+        if (notification != null) {
             notifyMng.notify(notificationId, notification.build());
         }
     }

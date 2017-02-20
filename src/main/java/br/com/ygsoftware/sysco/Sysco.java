@@ -18,6 +18,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 
+import br.com.ygsoftware.sysco.enums.RequestMethods;
 import br.com.ygsoftware.sysco.interfaces.FileUploadListener;
 import br.com.ygsoftware.sysco.interfaces.RequestListener;
 import br.com.ygsoftware.sysco.interfaces.SSEListener;
@@ -108,7 +109,7 @@ public class Sysco {
             return;
         }
         if (request.isValidMethod()) {
-            requestListener.onError(request.getMethod(), new UnsupportedOperationException("You can not send POST or FILES for GET method"));
+            requestListener.onError(request.getUrl(), new UnsupportedOperationException("You can not send POST or FILES for GET method"));
             return;
         }
         try {
@@ -245,7 +246,7 @@ public class Sysco {
     }
 
     private void preparePOSTStrings() throws IOException {
-        Map<String, ?> arrayPost = request.getArray(Request.POST_METHOD);
+        Map<String, ?> arrayPost = request.getArray(RequestMethods.POST);
         for (String key : arrayPost.keySet()) {
             String value = URLEncoder.encode((String)arrayPost.get(key), "UTF-8");
 
@@ -262,7 +263,7 @@ public class Sysco {
     }
 
     private void preparePOSTSFiles() {
-        Map<String, ?> arrayFiles = request.getArray(Request.FILES_METHOD);
+        Map<String, ?> arrayFiles = request.getArray(RequestMethods.FILES);
         for (String key : arrayFiles.keySet()) {
             File file = (File)arrayFiles.get(key);
             try {
