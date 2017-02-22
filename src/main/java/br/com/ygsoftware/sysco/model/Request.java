@@ -72,7 +72,7 @@ public class Request {
         postFilesLength = 0;
         this.data = data;
         if(data != null) {
-            for (Method method : data) {
+            for (Method method : data.getAll()) {
                 if (method instanceof GetString) {
                     getStringsLength++;
                 } else if (method instanceof PostString) {
@@ -168,7 +168,7 @@ public class Request {
     public HttpURLConnection build() throws Exception {
         if (!requested) {
             requested = true;
-            for (Method method : data) {
+            for (Method method : data.getAll()) {
                 method.setRequested(requested);
             }
         }else{
@@ -281,7 +281,7 @@ public class Request {
     }
 
     public void clearAll() {
-        data.clear();
+        data.removeAll();
         arrayHeader.clear();
         getStringsLength = 0;
         postStringsLength = 0;
@@ -323,7 +323,7 @@ public class Request {
     public Map<String, String> getArray(RequestMethods method) {
         Map<String, String> res = new HashMap<>();
 
-        for (Method obj : data) {
+        for (Method obj : data.getAll()) {
             if (method == RequestMethods.GET && obj instanceof GetString) {
                 res.put(obj.getKey(), ((GetString) obj).getValue());
             } else if (method == RequestMethods.POST && obj instanceof PostString) {

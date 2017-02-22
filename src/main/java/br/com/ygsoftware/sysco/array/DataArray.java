@@ -55,4 +55,8 @@ public class DataArray {
         methods.clear();
         return this;
     }
+
+    public ArrayList<Method> getAll() {
+        return methods;
+    }
 }

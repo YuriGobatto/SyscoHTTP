@@ -77,4 +77,12 @@ public class RequestDownload {
 
         return conn;
     }
+
+    public boolean isDownloading() {
+        return downloading;
+    }
+
+    public void start() {
+        downloading = true;
+    }
 }
