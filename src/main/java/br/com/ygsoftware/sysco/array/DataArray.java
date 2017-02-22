@@ -4,29 +4,55 @@ import java.util.ArrayList;
 
 import br.com.ygsoftware.sysco.model.Method;
 
-/**
- * Created by adriana on 26/01/2017.
- */
 
-public class DataArray extends ArrayList<Method> {
+public class DataArray {
 
+    private ArrayList<Method> methods;
+
+    public DataArray() {
+        methods = new ArrayList<>();
+    }
+
+    public DataArray(DataArray array) {
+        this.methods = array.methods;
+    }
+
+    public <M extends Method> DataArray add(M method) {
+        methods.add(method);
+        return this;
+    }
 
     public boolean contains(String key){
         return get(key) != null;
     }
 
-    public void remove(String key){
+    public DataArray remove(String key) {
         if(contains(key)) {
-            remove(get(key));
+            methods.remove(get(key));
         }
+        return this;
     }
 
     public Method get(String key){
-        for (Method data : this){
+        for (Method data : methods) {
             if(key.equals(data.getKey())){
                 return data;
             }
         }
         return null;
+    }
+
+    public int size() {
+        return methods.size();
+    }
+
+    public <M extends Method> DataArray update(String key, M newMethod) {
+        methods.set(methods.indexOf(get(key)), newMethod);
+        return this;
+    }
+
+    public DataArray removeAll() {
+        methods.clear();
+        return this;
     }
 }
