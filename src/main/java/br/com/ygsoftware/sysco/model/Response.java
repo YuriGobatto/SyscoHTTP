@@ -4,6 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,10 +29,12 @@ public class Response implements Parcelable {
     private String contentType;
     private int contentLength;
     private Map<String, List<String>> headerFields = null;
+    private JSONObject responseJson = null;
 
     private String[] VALID_IMAGE_TYPES = {"image/jpeg", "image/bmp", "image/gif", "image/jpg", "image/png"};
     private String[] VALID_AUDIO_TYPES = {"audio/mpeg", "audio/ogg", "audio/x-wav"};
     private String[] VALID_VIDEO_TYPES = {"video/wav", "video/mp4"};
+    private String[] VALID_JSON_TYPES = {"application/json"};
 
     public Response(Map<String, List<String>> headerFields, int responseCode, String responseMessage, InputStream responseStream, String contentType, int contentLength) {
         this.headerFields = headerFields;
@@ -39,6 +44,13 @@ public class Response implements Parcelable {
         this.responseStream = responseStream;
         this.responseString = StreamToString();
         this.contentLength = contentLength;
+        if (this.contentType.toLowerCase().contains(VALID_JSON_TYPES[0].toLowerCase())) {
+            try {
+                responseJson = new JSONObject(this.responseString);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     protected Response(Parcel in) {
@@ -121,6 +133,10 @@ public class Response implements Parcelable {
         return contentLength;
     }
 
+    public JSONObject getResponseJson() {
+        return responseJson;
+    }
+
     private String StreamToString() {
         if (contentType.contains("image/")) {
             return "Image File";
@@ -200,11 +216,12 @@ public class Response implements Parcelable {
     public String toString() {
         return "Response{" +
                 "\n headerFields='" + getHeaderFieldsToString() + '\'' +
-                "\n, responseCode=" + responseCode +
-                "\n, responseMessage='" + responseMessage + '\'' +
-                "\n, responseString='" + responseString + '\'' +
-                "\n, contentType='" + contentType + '\'' +
-                "\n, contentLength=" + contentLength +
+                ", \n responseCode=" + responseCode +
+                ", \n responseMessage='" + responseMessage + '\'' +
+                ", \n responseString='" + responseString + '\'' +
+                ", \n responseJson='" + responseJson + '\'' +
+                ", \n contentType='" + contentType + '\'' +
+                ", \n contentLength=" + contentLength +
                 "\n}";
     }
 

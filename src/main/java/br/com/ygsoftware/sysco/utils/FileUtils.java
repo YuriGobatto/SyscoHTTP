@@ -1,5 +1,6 @@
 package br.com.ygsoftware.sysco.utils;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresPermission;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
@@ -160,6 +162,7 @@ public class FileUtils {
         return type;
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     public static boolean copy(File sourceFile, File destinationFile) throws IOException {
 
         if(!sourceFile.isFile()){
@@ -195,6 +198,7 @@ public class FileUtils {
         return destinationFile.exists();
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     public static boolean move(File sourceFile, File destinationFile) throws IOException {
         boolean isCopy = copy(sourceFile, destinationFile);
 

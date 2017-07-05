@@ -1,6 +1,7 @@
 package br.com.ygsoftware.sysco.model;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -157,12 +159,7 @@ public class Request {
     }
 
     public Request rebuild(){
-        url = "";
-        method = RequestMethods.POST;
-        requested = false;
-        clearAll();
-
-        return this;
+        return new Request(url, method, data);
     }
 
     public HttpURLConnection build() throws Exception {
@@ -172,7 +169,7 @@ public class Request {
                 method.setRequested(requested);
             }
         }else{
-            throw new UnsupportedOperationException("Você não pode fazer um request com o mesmo objeto. Chame rebuld para poder consertar");
+            throw new UnsupportedOperationException("Você não pode fazer um request com o mesmo objeto. Chame rebuild para poder consertar");
         }
         prepareGETStrings();
         URL Url = new URL(url);
@@ -208,38 +205,25 @@ public class Request {
 
     private void prepareGETStrings() throws UnsupportedEncodingException {
         Map<String, String> arrayGet = getArray(RequestMethods.GET);
-        String prepareUrlSplit = url.replace("?", "_QST_");
-        String prepareUrl = prepareUrlSplit.split("_QST_")[0];
-        if (prepareUrlSplit.split("_QST_").length - 1 > 0) {
-            String getStr = prepareUrlSplit.split("_QST_")[1];
-            String[] gets = getStr.split("&");
-            for (String get : gets) {
-                String[] getKV = get.split("=");
-                String key = getKV[0];
-                String value = getKV[1];
-                if (!data.contains(key)) {
-                    data.add(new GetString(key, value));
-                }
-            }
+
+        URI uri = URI.create(url);
+        Uri.Builder builder = new Uri.Builder()
+                .scheme(uri.getScheme())
+                .authority(uri.getHost())
+                .path(uri.getPath());
+
+        if (uri.getQuery() != null) {
+            builder.query(uri.getQuery());
         }
-        boolean isFirst = true;
+
         Iterator<String> keys = arrayGet.keySet().iterator();
-        StringBuilder sb = new StringBuilder();
-        sb.append(prepareUrl);
-        sb.append("?");
         while (keys.hasNext()) {
             String key = keys.next();
             String value = URLEncoder.encode(arrayGet.get(key), "UTF-8");
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                sb.append("&");
-            }
-            sb.append(key);
-            sb.append("=");
-            sb.append(value);
+
+            builder.appendQueryParameter(key, value);
         }
-        url = sb.toString();
+        url = builder.build().toString();
     }
 
     public String getUrl() {

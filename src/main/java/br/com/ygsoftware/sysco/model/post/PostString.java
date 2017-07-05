@@ -1,5 +1,8 @@
 package br.com.ygsoftware.sysco.model.post;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import br.com.ygsoftware.sysco.utils.Check;
 
 /**
@@ -10,6 +13,10 @@ public final class PostString extends Post<String> {
 
     public PostString(String key, String value) {
         super(key, value);
+    }
+
+    public PostString(String key, String value, boolean encode) throws UnsupportedEncodingException {
+        this(key, (encode ? URLEncoder.encode(value, "UTF-8") : value));
     }
 
     @Override
