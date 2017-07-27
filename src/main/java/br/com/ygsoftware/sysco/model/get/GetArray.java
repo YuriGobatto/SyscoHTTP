@@ -3,17 +3,17 @@ package br.com.ygsoftware.sysco.model.get;
 import br.com.ygsoftware.sysco.utils.Check;
 
 /**
- * Created by adriana on 26/01/2017.
+ * Created by adriana on 26/07/2017.
  */
 
-public final class GetString extends Get<String> {
+public class GetArray extends Get<String[]> {
 
-    public GetString(String key, String value) {
+    public GetArray(String key, String... value) {
         super(key, value);
     }
 
     @Override
-    public void setValue(String value) {
+    public void setValue(String... value) {
         if (!Check.isValidValue(value)) {
             try {
                 throw new Exception("The value is not valid");
@@ -24,8 +24,8 @@ public final class GetString extends Get<String> {
         super.setValue(value);
     }
 
-    public int getLength(){
-        return getValue().length();
+    public int getLength() {
+        return getValue().length;
     }
 
 }

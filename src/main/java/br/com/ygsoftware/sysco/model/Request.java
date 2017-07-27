@@ -21,7 +21,9 @@ import java.util.Map;
 import br.com.ygsoftware.sysco.BuildConfig;
 import br.com.ygsoftware.sysco.array.DataArray;
 import br.com.ygsoftware.sysco.enums.RequestMethods;
+import br.com.ygsoftware.sysco.model.get.GetArray;
 import br.com.ygsoftware.sysco.model.get.GetString;
+import br.com.ygsoftware.sysco.model.post.PostArray;
 import br.com.ygsoftware.sysco.model.post.PostFile;
 import br.com.ygsoftware.sysco.model.post.PostString;
 
@@ -40,7 +42,9 @@ public class Request {
     DataArray data = new DataArray();
 
     private int getStringsLength = 0;
+    private int getArraysLength = 0;
     private int postStringsLength = 0;
+    private int postArraysLength = 0;
     private int postFilesLength = 0;
 
     private boolean requested = false;
@@ -70,15 +74,21 @@ public class Request {
 
     public Request setData(DataArray data) {
         getStringsLength = 0;
+        getArraysLength = 0;
         postStringsLength = 0;
+        postArraysLength = 0;
         postFilesLength = 0;
         this.data = data;
         if(data != null) {
             for (Method method : data.getAll()) {
                 if (method instanceof GetString) {
                     getStringsLength++;
+                } else if (method instanceof GetArray) {
+                    getArraysLength++;
                 } else if (method instanceof PostString) {
                     postStringsLength++;
+                } else if (method instanceof PostArray) {
+                    postArraysLength++;
                 } else if (method instanceof PostFile) {
                     postFilesLength++;
                 }
@@ -119,8 +129,12 @@ public class Request {
     /**
      * @param data String example:
      * File key=file://path&key2=file://path
+     *
      * Get key=GET:value&key2=GET:value2
+     * Get Array key=GET:value::value2
+     *
      * Post key=value&key2=value2
+     * Post Array key=value::value2
      *
      * @return DataArray contendo os valores para envio
      * */
@@ -130,12 +144,20 @@ public class Request {
         for (String kV : dataKV){
             String key = kV.split("=")[0];
             String value = kV.split("=")[1];
-            if(URLUtil.isFileUrl(value)){
-                dataArray.add(new PostFile(key, new File(value)));
-            }else if(value.startsWith("GET:")){
-                dataArray.add(new GetString(key, value.replace("GET:", "")));
-            }else {
-                dataArray.add(new PostString(key, value));
+            if (key.endsWith("[]")) {
+                if (value.startsWith("GET:")) {
+                    dataArray.add(new GetArray(key, value.replaceAll("GET:", "").split("::")));
+                } else {
+                    dataArray.add(new PostArray(key, value.split("::")));
+                }
+            } else {
+                if (URLUtil.isFileUrl(value)) {
+                    dataArray.add(new PostFile(key, new File(value)));
+                } else if (value.startsWith("GET:")) {
+                    dataArray.add(new GetString(key, value.replace("GET:", "")));
+                } else {
+                    dataArray.add(new PostString(key, value));
+                }
             }
         }
 
@@ -205,6 +227,7 @@ public class Request {
 
     private void prepareGETStrings() throws UnsupportedEncodingException {
         Map<String, String> arrayGet = getArray(RequestMethods.GET);
+        Map<String, String[]> arrayGets = getParameterArrays(RequestMethods.GET);
 
         URI uri = URI.create(url);
         Uri.Builder builder = new Uri.Builder()
@@ -222,6 +245,14 @@ public class Request {
             String value = URLEncoder.encode(arrayGet.get(key), "UTF-8");
 
             builder.appendQueryParameter(key, value);
+        }
+
+        Iterator<String> arrayKeys = arrayGets.keySet().iterator();
+        while (keys.hasNext()) {
+            String key = arrayKeys.next();
+            for (String value : arrayGets.get(key)) {
+                builder.appendQueryParameter(key, value);
+            }
         }
         url = builder.build().toString();
     }
@@ -268,7 +299,9 @@ public class Request {
         data.removeAll();
         arrayHeader.clear();
         getStringsLength = 0;
+        getArraysLength = 0;
         postStringsLength = 0;
+        postArraysLength = 0;
         postFilesLength = 0;
     }
 
@@ -304,16 +337,32 @@ public class Request {
         return sb.toString();
     }
 
-    public Map<String, String> getArray(RequestMethods method) {
-        Map<String, String> res = new HashMap<>();
+    public <P> Map<String, P> getArray(RequestMethods method) {
+        Map<String, P> res = new HashMap<>();
 
         for (Method obj : data.getAll()) {
             if (method == RequestMethods.GET && obj instanceof GetString) {
-                res.put(obj.getKey(), ((GetString) obj).getValue());
+                res.put(obj.getKey(), ((P) ((GetString) obj).getValue()));
             } else if (method == RequestMethods.POST && obj instanceof PostString) {
-                res.put(obj.getKey(), ((PostString) obj).getValue());
+                res.put(obj.getKey(), ((P) ((PostString) obj).getValue()));
             } else if (method == RequestMethods.FILES && obj instanceof PostFile) {
-                res.put(obj.getKey(), ((PostFile) obj).getValue().toString());
+                res.put(obj.getKey(), ((P) ((PostFile) obj).getValue().toString()));
+            }
+        }
+
+        return res;
+    }
+
+    public Map<String, String[]> getParameterArrays(RequestMethods method) {
+        Map<String, String[]> res = new HashMap<>();
+
+        for (Method obj : data.getAll()) {
+            if (method == RequestMethods.GET && obj instanceof GetArray) {
+                res.put(obj.getKey(), ((GetArray) obj).getValue());
+            } else if (method == RequestMethods.POST && obj instanceof PostArray) {
+                res.put(obj.getKey(), ((PostArray) obj).getValue());
+            } else if (method == RequestMethods.FILES) {
+                throw new UnsupportedOperationException("FILES is not supported in the method see Request#getArray(RequestMethods)");
             }
         }
 

@@ -7,9 +7,9 @@ import br.com.ygsoftware.sysco.model.Method;
  * Created by adriana on 26/01/2017.
  */
 
-abstract class Get extends Method<String> {
+abstract class Get<S> extends Method<S> {
 
-    Get(String key, String value) {
+    Get(String key, S value) {
         super(key, value, RequestMethods.GET);
     }
 

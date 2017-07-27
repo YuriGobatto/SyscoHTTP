@@ -1,6 +1,5 @@
 package br.com.ygsoftware.sysco.utils;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.Context;
@@ -10,15 +9,17 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.support.annotation.RequiresPermission;
 import android.webkit.MimeTypeMap;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 /**
  * Created by adriana on 16/12/2016.
@@ -49,7 +50,7 @@ public class FileUtils {
             else if (isDownloadsDocument(uri)) {
 
                 String id = "0";
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     id = DocumentsContract.getDocumentId(uri);
                 }
                 final Uri contentUri = ContentUris.withAppendedId(
@@ -60,7 +61,7 @@ public class FileUtils {
             // MediaProvider
             else if (isMediaDocument(uri)) {
                 String docId = "0";
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     docId = DocumentsContract.getDocumentId(uri);
                 }
                 final String[] split = docId.split(":");
@@ -162,7 +163,6 @@ public class FileUtils {
         return type;
     }
 
-    @RequiresPermission(allOf = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     public static boolean copy(File sourceFile, File destinationFile) throws IOException {
 
         if(!sourceFile.isFile()){
@@ -198,7 +198,6 @@ public class FileUtils {
         return destinationFile.exists();
     }
 
-    @RequiresPermission(allOf = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     public static boolean move(File sourceFile, File destinationFile) throws IOException {
         boolean isCopy = copy(sourceFile, destinationFile);
 
@@ -206,6 +205,32 @@ public class FileUtils {
             sourceFile.delete();
         }
         return (!sourceFile.exists() && destinationFile.exists());
+    }
+
+    public static File createFile(File destinationFile, String contentFile) throws IOException {
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(destinationFile), "UTF-8");
+        outputStreamWriter.write(contentFile);
+        outputStreamWriter.close();
+        return destinationFile;
+    }
+
+    public static String readFile(File sourceFile) throws IOException {
+        InputStream inputStream = new FileInputStream(sourceFile);
+
+        if (inputStream != null) {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String receiveString = "";
+            StringBuilder stringBuilder = new StringBuilder();
+
+            while ((receiveString = bufferedReader.readLine()) != null) {
+                stringBuilder.append(receiveString);
+            }
+
+            inputStream.close();
+            return stringBuilder.toString();
+        }
+        return null;
     }
 
 }

@@ -16,6 +16,10 @@ public class Check {
         return value != null && !(value.length() <= 0 || value.isEmpty());
     }
 
+    public static boolean isValidValue(String... value) {
+        return value != null && !(value.length <= 0);
+    }
+
     public static void isValidURL(String url, String... a) {
         if (url == null || url.isEmpty()) {
             throw new NullPointerException("The url is null or empty");
