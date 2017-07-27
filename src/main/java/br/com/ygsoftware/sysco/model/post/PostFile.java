@@ -1,5 +1,7 @@
 package br.com.ygsoftware.sysco.model.post;
 
+import android.os.Parcel;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -18,6 +20,11 @@ public final class PostFile extends Post<File> {
                 e.printStackTrace();
             }
         }
+    }
+
+    private PostFile(Parcel in) {
+        super(in);
+        setValue(in.readString());
     }
 
     @Override
@@ -48,4 +55,26 @@ public final class PostFile extends Post<File> {
         return getValue().getName();
     }
 
+    protected static final Creator<PostFile> CREATOR = new Creator<PostFile>() {
+        @Override
+        public PostFile createFromParcel(Parcel source) {
+            return new PostFile(source);
+        }
+
+        @Override
+        public PostFile[] newArray(int size) {
+            return new PostFile[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeString(getPath());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 }

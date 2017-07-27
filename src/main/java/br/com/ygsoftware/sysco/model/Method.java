@@ -1,10 +1,13 @@
 package br.com.ygsoftware.sysco.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import br.com.ygsoftware.sysco.enums.RequestMethods;
 import br.com.ygsoftware.sysco.utils.Check;
 
 
-public abstract class Method<T> {
+public abstract class Method<T> implements Parcelable {
 
     private String key;
     private T value;
@@ -50,4 +53,14 @@ public abstract class Method<T> {
         this.requested = requested;
     }
 
+    public Method(Parcel in) {
+        key = in.readString();
+        method = RequestMethods.valueOf(in.readString());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(key);
+        dest.writeString(method.name());
+    }
 }

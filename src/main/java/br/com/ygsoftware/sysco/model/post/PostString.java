@@ -1,5 +1,7 @@
 package br.com.ygsoftware.sysco.model.post;
 
+import android.os.Parcel;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -19,6 +21,11 @@ public final class PostString extends Post<String> {
         this(key, (encode ? URLEncoder.encode(value, "UTF-8") : value));
     }
 
+    private PostString(Parcel in) {
+        super(in);
+        setValue(in.readString());
+    }
+
     @Override
     public void setValue(String value) {
         if (!Check.isValidValue(value)) {
@@ -33,5 +40,28 @@ public final class PostString extends Post<String> {
 
     public int getLength() {
         return getValue().length();
+    }
+
+    protected static final Creator<PostString> CREATOR = new Creator<PostString>() {
+        @Override
+        public PostString createFromParcel(Parcel source) {
+            return new PostString(source);
+        }
+
+        @Override
+        public PostString[] newArray(int size) {
+            return new PostString[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeString(getValue());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }

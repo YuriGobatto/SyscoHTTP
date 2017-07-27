@@ -17,6 +17,10 @@ public class DataArray {
         this.methods = array.methods;
     }
 
+    public <M extends Method> DataArray(ArrayList<M> array) {
+        this.methods = (ArrayList<Method>) array;
+    }
+
     public <M extends Method> DataArray add(M method) {
         methods.add(method);
         return this;
